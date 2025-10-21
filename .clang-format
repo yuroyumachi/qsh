@@ -1,0 +1,5 @@
+
+BasedOnStyle: GNU
+IndentWidth: 8
+UseTab: Always
+BreakBeforeBraces: Linux
