@@ -8,8 +8,9 @@ main (void)
 {
 	char *cmd;
 	char **args;
+	int status;
 
-	while (1) {
+	do {
 		printf ("] ");
 		cmd = qsh_input ();
 		if (cmd == NULL) {
@@ -17,7 +18,7 @@ main (void)
 		}
 		args = qsh_split_line (cmd);
 
-		qsh_exec (args);
+		status = qsh_exec (args);
 
 		if (args != NULL) {
 			for (int i = 0; args[i]; ++i)
@@ -27,7 +28,7 @@ main (void)
 
 		if (cmd)
 			free (cmd);
-	}
+	} while (status != QSH_EXIT);
 
 	return 0;
 }
