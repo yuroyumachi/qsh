@@ -4,16 +4,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MINIMUM_BUFFER_SIZE 4
 char *
-qsh_input (void)
+input (void)
 {
-	char *buffer = (char *)malloc (MINIMUM_BUFFER_SIZE * sizeof (char));
+	int capacity = 4;
+	int length = 0;
+	char *buffer = (char *)malloc (4 * sizeof (char));
 	if (buffer == NULL)
 		return NULL;
-
-	int length = 0;
-	int capacity = MINIMUM_BUFFER_SIZE;
 
 	int ch;
 	while ((ch = getchar ()) != EOF && ch != '\n') {
@@ -39,6 +37,69 @@ qsh_input (void)
 	}
 
 	buffer[length] = '\0';
+	return buffer;
+}
+
+// 处理注释以及空白符号
+// 将 data 里的所有注释去除, 将没有被引号包裹的连续空格转换为 1 个
+char *
+preprocess (char *data)
+{
+	int capacity = 4;
+	int length = 0;
+	char *buffer = malloc (capacity * sizeof (char));
+
+	int skip_comment = 0;
+	char quote_ch = '\0';
+	for (int i = 0; data[i] != '\0'; ++i) {
+		if (skip_comment) {
+			if (data[i] != ')') {
+				continue;
+			} else {
+				skip_comment = 0;
+			}
+
+		} else if (quote_ch) {
+			if (quote_ch == data[i]) {
+				quote_ch = '\0';
+			} else {
+				goto buffer_append;
+			}
+
+		} else if (data[i] == '#') {
+			if (data[i + 1] == '(') {
+				skip_comment = 1;
+			} else {
+				break;
+			}
+
+		} else if (data[i] == '\"' || data[i] == '\'') {
+			quote_ch = data[i];
+
+		} else if (isspace (data[i])) {
+			if (!isspace (buffer[length - 1])) {
+				goto buffer_append;
+			}
+		} else {
+			goto buffer_append;
+		}
+		continue;
+
+	buffer_append:
+		buffer[length++] = data[i];
+		if (length >= capacity) {
+			capacity *= 2;
+			char *tmp = realloc (buffer, capacity * sizeof (char));
+			if (tmp == NULL) {
+				free (buffer);
+				return NULL;
+			}
+			buffer = tmp;
+		}
+	}
+
+	buffer[length] = '\0';
+
 	return buffer;
 }
 
@@ -104,8 +165,9 @@ tokenizing (char *s, int *pos)
 // 返回: 返回指向一串字符的指针
 // 说明: 如果 alloc 失败, 返回 NULL
 char **
-qsh_split_line (char *s)
+split_line (char *s)
 {
+	s = preprocess (s);
 	int capacity = 4;
 	int length = 0;
 	char **args = malloc (capacity * sizeof (char *));
@@ -124,6 +186,7 @@ qsh_split_line (char *s)
 		}
 	}
 	args[length] = NULL;
+	free (s);
 	return args;
 
 alloc_error_cleanup:

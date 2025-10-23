@@ -33,7 +33,7 @@ qsh_cd (char **args)
 	char *buffer = getcwd (NULL, 0);
 	if (buffer == NULL) {
 		perror ("?");
-		return -1;
+		return QSH_ALLOC_ERROR;
 	}
 	printf ("%s\n", buffer);
 	free (buffer);
@@ -52,7 +52,7 @@ qsh_bye (char **args)
 int
 qsh_help (char **args)
 {
-	puts ("qsh - v0.1.0");
+	printf ("qsh - v%s\n", QSH_VERSION);
 	puts ("available builtins:");
 
 	for (int i = 0; i < builtin_amount (); ++i) {
@@ -80,6 +80,12 @@ launch (char **args)
 		do {
 			wpid = waitpid (pid, &status, WUNTRACED);
 		} while (!WIFEXITED (status) && !WIFSIGNALED (status));
+	}
+
+	if (WIFEXITED (status)) {
+		return WEXITSTATUS (status);
+	} else if (WIFSIGNALED (status)) {
+		return WTERMSIG (status);
 	}
 
 	return QSH_SUCCESS;

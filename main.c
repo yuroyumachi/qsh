@@ -10,13 +10,15 @@ main (void)
 	char **args;
 	int status;
 
+	puts ("Que SHell");
+
 	do {
 		printf ("] ");
-		cmd = qsh_input ();
+		cmd = input ();
 		if (cmd == NULL) {
-			perror ("?");
+			return 0;
 		}
-		args = qsh_split_line (cmd);
+		args = split_line (cmd);
 
 		status = qsh_exec (args);
 
