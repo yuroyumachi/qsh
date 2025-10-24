@@ -1,7 +1,14 @@
 
 #include "qsh.h"
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+void
+handle_sigint (int signal)
+{
+	return;
+}
 
 int
 main (void)
@@ -9,6 +16,8 @@ main (void)
 	char *cmd;
 	char **args;
 	int status;
+
+	signal (SIGINT, handle_sigint);
 
 	puts ("Que SHell");
 

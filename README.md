@@ -12,4 +12,6 @@ qsh(Que SHell) is a shell written in c.
 
 just run `xmake`
 
-### IN
+### INSTALL
+
+run `xmake install`
